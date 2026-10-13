@@ -14,7 +14,9 @@
 <body>
    <div id='map'></div>
    <script>
+      // public access token so mapbox recognizes us
       mapboxgl.accessToken = 'pk.eyJ1IjoianVuc2VpdCIsImEiOiJjbXY1dnhwMngwMzFmMnhwdXpjM2V5OGxqIn0.dSmEOsnTEJ5uP2pj0qv9xA';
+      // initialize the mapbox instance rendering the map
       const mymap = new mapboxgl.Map({
              container: 'map',
              //style: 'mapbox://styles/mapbox/navigation-night-v1',
@@ -27,14 +29,18 @@
              
           });
 // code from the next step will go here!
+// Adds full screen UI and function
 mymap.addControl(new mapboxgl.FullscreenControl());
+// Adds a zoom, zoom out and compass/reconfigure function and UI
 mymap.addControl(new mapboxgl.NavigationControl());
+// Adds style choices
 mymap.on('style.load', () => {
     mymap.setConfigProperty('basemap', 'lightPreset', 'dusk');
     mymap.setConfigProperty('basemap', 'showPointOfInterestLabels', false);
     mymap.setconfigproperty('basemap', 'showTransitLabels', false);
     mymap.setconfigproperty('basemap', 'theme', 'faded');
     // I got rid of all transit labels because showing that was not the point of the map
+    // so deleting them will make the other parts of the map easy to read
     mymap.setconfigpropoerty('basemap', 'font', 'EB Garamond');
     // This font was chosen because it has as professional yet artistic feel
 });
