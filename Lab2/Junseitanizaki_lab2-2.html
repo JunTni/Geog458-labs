@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>World Cities by Population</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.js"></script>
+    <style>
+        body { margin: 0; padding: 0; }
+        #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+        /* Layout of the legend panel. */
+        body { margin: 0; padding: 0; }
+/*this part was made with an assitance from AI*/
+#header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: #150D85;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    z-index: 2;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+#header h1 {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    font-size: 22px;
+}
+
+#map { position: absolute; top: 60px; bottom: 0; width: 100%; }
+
+#legend {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 210px;
+    background: #fff;
+    margin-right: 20px;
+    margin-bottom: 40px;
+    padding: 10px 20px 10px 10px;
+    border-radius: 3px;
+    text-align: center;
+}
+
+/* Each row for a magnitude value. */
+.break {
+    position: relative;
+    margin: 0;
+    padding: 0;
+}
+
+/* The circular symbol. */
+.dot {
+    display: inline-block;
+    margin-top: 5px;
+    border-radius: 50%;
+    opacity: 1;
+}
+
+/* Label next to the symbol. */
+.dot-label {
+    position: absolute;
+    top: 0;
+    right: 0;
+    font-style: italic;
+}
+
+/* Link color within the legend. */
+#legend a {
+    color: black;
+}
+    </style>
+</head>
+<body>
+    <div id="header">
+    <h1>World Cities by Population</h1>
+    </div>
+    <div id="map"></div>
+    <div id="legend"></div>
+    <script>
+        // Your map code goes here.
+    </script>
+</body>
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1IjoianVuc2VpdCIsImEiOiJjbXY1dnhwMngwMzFmMnhwdXpjM2V5OGxqIn0.dSmEOsnTEJ5uP2pj0qv9xA';
+        const mymap = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/light-v11',
+            projection: 'globe',
+            center: [-96, 37.8],
+            zoom: 1
+        });
+
+        // Add the next steps here, inside this script.
+
+        mymap.on('load', () => {
+mymap.addSource('population', {
+    type: 'geojson',
+    data: 'data/world-cities.geojson'
+});
+    mymap.addLayer({
+        id: 'population-layer',
+        type: 'circle',
+        source: 'population',
+        paint: {
+            'circle-radius': [
+    'interpolate', ['linear'],
+    ['to-number', ['get', 'population'], 0],
+    10000, 0.7,
+    50000, 1.5,
+    100000, 3,
+    500000, 5,
+    1000000, 8,
+    5000000, 10,
+    10000000, 17,
+    20000000, 30
+],
+            'circle-stroke-width': 1,
+            'circle-color': [
+    'interpolate', ['linear'],
+    ['to-number', ['get', 'population'], 0],
+    10000, '#C8C6F7',
+    50000, '#7F79ED',
+    100000, '#5F57E6',
+    500000, '#463DD9',
+    1000000, '#2C22C7',
+    5000000, '#150D85',
+    10000000, '#CC0E0E'
+],
+
+        }
+
+        
+    });
+    mymap.on('click', 'population-layer', (event) => {
+    const feature = event.features[0];
+    const coordinates = feature.geometry.coordinates.slice(0, 2);
+
+    new mapboxgl.Popup()
+        .setLngLat(coordinates)
+        .setHTML(`<strong>Population:</strong> ${feature.properties.population}
+        <strong>City:</strong> ${feature.properties.city}`)
+        .addTo(mymap);
+        });
+
+});
+// Anchor the legend to the HTML element with id="legend".
+const legend = document.getElementById('legend');
+const grades = [50000, 100000, 5000000, 10000000];
+const radii = [1.5, 3, 10, 17, 30];
+const colors = ['#7F79ED','#5F57E6', '#150D85', '#CC0E0E'];
+const labels = ['<strong>Population</strong>'];
+
+for (let i = 0; i < grades.length; i++) {
+    const value = grades[i];
+    const diameter = 2 * radii[i];
+
+    labels.push(
+        '<p class="break"><i class="dot" style="background:' + colors[i] +
+        '; width:' + diameter + 'px; height:' + diameter +
+        'px;"></i> <span class="dot-label" style="top:' +
+        diameter / 2 + 'px;">' + value + '</span></p>'
+    );
+}
+
+const source =
+    '<p style="text-align:right; font-size:10pt;">Source: ' +
+    '<a href="https://earthquake.usgs.gov/earthquakes/">USGS</a></p>';
+
+legend.innerHTML = labels.join('') + source;
+    </script>
+</body>
+</html>
