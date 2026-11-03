@@ -17,7 +17,7 @@
     mapboxgl.accessToken = 'pk.eyJ1IjoianVuc2VpdCIsImEiOiJjbXY1dnhwMngwMzFmMnhwdXpjM2V5OGxqIn0.dSmEOsnTEJ5uP2pj0qv9xA';
     const map = new mapboxgl.Map({
       container: 'map',
-      style: 'mapbox://styles/mapbox/dark-v11',
+      style: 'mapbox://styles/mapbox/outdoors-v12',
       projection: 'globe',
       center: [-79.999732, 40.4374],
       zoom: 11,
@@ -48,18 +48,18 @@ map.addSource('trees', {
       'stops': [[1, 0], [62, 1]]
     },
     'heatmap-intensity': {
-      'stops': [[11, 1], [15, 3]]
+      'stops': [[11, 1], [15, 15]]
     },
     'heatmap-color': [
       "interpolate", ["linear"], ["heatmap-density"],
-      0, "rgba(236,222,239,0)",
+      0, "rgba(208,222,239,0)",
       0.2, "rgb(208,209,230)",
-      0.4, "rgb(166,189,219)",
-      0.6, "rgb(103,169,207)",
-      0.8, "rgb(28,144,153)"
+      0.4, "rgb(200,200,42)",
+      0.6, "rgb(220,167,42)",
+      0.8, "rgb(220,107,42)"
     ],
     'heatmap-radius': {
-      'stops': [[11, 15], [15, 20]]
+      'stops': [[11, 20], [15, 40]]
     },
     'heatmap-opacity': {
       'default': 1,
@@ -105,6 +105,12 @@ map.addSource('trees', {
   }
 });
       // [1.6] REPLACE THIS LINE WITH THE TREE POPUP BLOCK.
+      map.on('click', 'trees-point', (event) => {
+  new mapboxgl.Popup()
+    .setLngLat(event.features[0].geometry.coordinates)
+    .setHTML(`<strong>DBH:</strong> ${event.features[0].properties.dbh}`)
+    .addTo(map);
+});
     });
   </script>
 </body>
