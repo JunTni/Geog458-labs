@@ -43,6 +43,9 @@
     @media (max-width: 720px) {
       body { display: block; } #sidebar { height: auto; } #map-panel { height: 65vh; min-height: 400px; }
     }
+    .mapboxgl-popup { pointer-events: none; }
+    .mapboxgl-popup-content { color: #26313d; font: 13px/1.5 Arial, sans-serif; padding: 10px 12px; }
+    .popup-title { margin: 0 0 4px; font-size: 14px; font-weight: bold; }
   </style>
 </head>
 <body>
@@ -159,10 +162,45 @@ highlightCounties = function(features) {
     ? ['==', ['get', 'OBJECTID'], -1] : inFocus);
 };
 
+// One popup, created once and reused
+const popup = new mapboxgl.Popup({
+  closeButton: false,
+  closeOnClick: false,
+  offset: 12
+});
+let popupId = null;
+
+function popupHTML(props) {
+  const p00 = +props.POP2000, p20 = +props.POP2020;
+  const change = p20 - p00;
+  return '<p class="popup-title">' + props.NAMELSAD10 + '</p>' +
+    'Population 2000: ' + d3.format(',')(p00) + '<br>' +
+    'Population 2020: ' + d3.format(',')(p20) + '<br>' +
+    'Change: ' + d3.format('+,')(change) + ' (' + d3.format('+.1f')(props.POP_CHANGE) + '%)';
+}
+
+function hidePopup() {
+  popup.remove();
+  popupId = null;
+}
+
 map.on('mousemove', 'county-fill', function(event) {
   const id = event.features[0].properties.OBJECTID;
   const feature = matchingCounties.find(county => county.properties.OBJECTID === id) || null;
   map.getCanvas().style.cursor = feature ? 'pointer' : '';
+  console.log('hover', id);
+
+  // Popup: only for counties that match the search, follows the pointer
+  if (feature) {
+    if (popupId !== id) {
+      popup.setHTML(popupHTML(feature.properties));
+      popupId = id;
+    }
+    popup.setLngLat(event.lngLat).addTo(map);
+  } else {
+    hidePopup();
+  }
+
   if (selectedCounty || hoveredCounty === feature) return;
   hoveredCounty = feature;
   updateDashboard();
@@ -170,6 +208,7 @@ map.on('mousemove', 'county-fill', function(event) {
 
 map.on('mouseleave', 'county-fill', function() {
   map.getCanvas().style.cursor = '';
+  hidePopup();
   if (selectedCounty || !hoveredCounty) return;
   hoveredCounty = null;
   updateDashboard();
